@@ -34,6 +34,7 @@ export async function fetchChainDataFromNetwork(tx: any) {
         destinationNetwork.chainId
       ),
       isCCTP: tx?.isCCTP ? tx?.isCCTP : false,
+      isStargate: tx?.isStargate ? tx?.isStargate : false,
     };
 
     let job: any = { data: data };
@@ -42,12 +43,15 @@ export async function fetchChainDataFromNetwork(tx: any) {
       job.data.sourceChainId,
       getThreshold(job.data.threshold)
     );
-    if (job?.returnvalue?.status == true && job.data.isSameNetworkSwap) {
-      let decodedData: any = web3Service.getLogsFromTransactionReceipt(job);
-      decodedData.isSameNetworkSwap = job.data.isSameNetworkSwap;
-      await updateTransaction(job, { ...decodedData }, null);
-    } else if (job?.returnvalue?.status == true) {
-      await createSignature(job);
+    if (job?.returnvalue?.status == true) {
+      if (job.data.isSameNetworkSwap || job.data.isStargate) {
+        let decodedData: any = web3Service.getLogsFromTransactionReceipt(job);
+        decodedData.isSameNetworkSwap = job.data.isSameNetworkSwap;
+        decodedData.isStargate = job.data.isStargate;
+        await updateTransaction(job, { ...decodedData }, null);
+      } else {
+        await createSignature(job);
+      }
     } else {
       console.info(`failed!`);
       await updateTransaction(job, null, null);

@@ -20,6 +20,7 @@ export interface JobRequestBody {
   slippage: number;
   isSameNetworkSwap: boolean;
   isCCTP: boolean;
+  isStargate: boolean;
 }
 
 export interface UpdateJobRequestBody {
